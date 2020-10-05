@@ -32,15 +32,16 @@
         <br/>
         <center>
             <div v-bind:key="cat" v-for="(cat) in cats">
-                <h5 class="username-post">
-                    <img :src="`${cat.profile}`" style="width: 3%;border-radius: 16px;"/>
-                    {{cat.name}}
-                    <img :src="require('./images/threedots.svg')" alt="" id="show-modal" @click="showDots = true" class="three-dots">
-                </h5>
-                <p class="post-p">
+                
+                <div class="post-p">
+                    <div class="username-post">
+                        <img :src="`${cat.profile}`" style="width: 5%;border-radius: 16px;margin-left: 2%;"/>
+                        {{cat.name}}
+                        <img :src="require('./images/threedots.svg')" alt="" id="show-modal" @click="showDots = true" class="three-dots">
+                    </div>
                     <span>
                         <!-- <img :src="`${cat.path}`" class="post-img"/> -->
-                        <div v-if="cat.path.length==1">
+                        <div v-if="cat.path.length==1" class="imgpo">
                             <!-- <div v-bind:key="inx" v-for="(t,inx) in catl.path"> -->
                                 <clazy-load :src="`${cat.path[0]}`">
                                     <img :src="`${cat.path[0]}`" class="post-img">
@@ -50,17 +51,15 @@
                                     </center>
                                     </div>
                                 </clazy-load>
-                                <br>
-                                <br>
                             <!-- </div> -->
                         </div>
-                        <div v-if="cat.path.length>1">
+                        <div v-if="cat.path.length>1" class="imgpo">
                                 <div class="slides">
                                 <transition-group name="slide" mode="out-in" enter-class="slide-in" leave-class="slide-out" enter-active-class="animated slide-in-active" leave-active-class="animated slide-out-active">
                                 <!-- eslint-disable vue/no-use-v-if-with-v-for,vue/no-confusing-v-for-v-if -->
                                 <div :key="index"
                                     v-for="index in cat.slides"
-                                >
+>
                                 <div v-if="index == active">
                                     <img :src="`${cat.path[index-1]}`" alt="" class="post-img">
                                 </div>
@@ -72,13 +71,14 @@
                                 <li v-bind:key="index" v-for="(dot, index) in cat.slides" :class="{ active: ++index === active }" @click="jump(index)"></li>
                             </ul>
                         </div>
-                        <br/>
                         <div class="like-btn">
-                            <img :src="image1" @click="myFunction(`${cat.id}`,`${cat.likes}`)" style="width:6%;">&nbsp;&nbsp;
+                            <img v-if="liked!=cat.id && iddot1!=cat.id" :src="image1" @click="myFunction(`${cat.id}`,`${cat.likes}`)" style="width:6%;">&nbsp;&nbsp;
+                            <img v-if="liked==cat.id" :src="image2" @click="mydislike(`${cat.id}`,`${cat.likes}`)" style="width:6%;">&nbsp;&nbsp;
                             <img :src="require('./images/c.png')" style="width:4%;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                             <img :src="require('./images/save.png')" style="width:4%;">
                             <br>
-                            {{cat.likes}}&nbsp;&nbsp;likes
+                            <p style="margin-left: 1.5%;margin-bottom: unset;">{{cat.likes}}&nbsp;&nbsp;likes</p>
+                            
                         </div>
                         <div class="comment" v-if="cat.comment.length<10">
                             <b>{{cat.name}}:</b>&nbsp;&nbsp; {{cat.comment}}
@@ -87,7 +87,6 @@
                         </div>
                         <div class="comment" v-if="cat.comment.length>10">
                             <span>
-                            
                             <p v-if="comid!=cat.id" style="margin-bottom: 0rem !important;"> <b>{{cat.name}}:</b>&nbsp;&nbsp; {{ cat.comment.substring(0,10) }}
                             <a @click="fullcom(`${cat.id}`)" v-if="iddot!=cat.id" class="showmore">Show more</a></p>
                             <p v-if="comid==cat.id"> <b>{{cat.name}}:</b>&nbsp;&nbsp;{{cat.comment}}</p>
@@ -96,7 +95,9 @@
                             {{cat.date}}
                         </div>
                     </span>
-                </p>
+                </div>
+                <br>
+                <br>
             </div>
         </center>
         <div class="footer">
@@ -126,6 +127,8 @@
         },
         data() {
             return {
+                iddot1:"",
+                liked:"",
                 active: 1,
                 comid:"",
                 iddot:"",
@@ -184,19 +187,16 @@
             fullcom(id){
                 this.iddot=id
                 this.comid=id
-                // console.log(id)
             },
-            myFunction(img,likes) {	
-                console.log(this.like)
-                if(this.image1==this.t){
-                    likes=parseInt(likes);
-                    likes=likes+1;
-                    console.log("inc")
-                }
-                else{
-                    likes=parseInt(likes);
-                    likes=likes-1;
-                    console.log("dec")
+            mydislike(img,likes){
+                this.iddot1=""
+                this.liked=""
+                console.log(img)
+                console.log(likes)
+                likes=parseInt(likes);
+                likes=likes-1;
+                if(likes<0){
+                    likes=0
                 }
                 likes=likes.toString();
                 console.log(likes)
@@ -242,10 +242,57 @@
                     }
                 })
                 localStorage.setItem("instausers", JSON.stringify(newusers));
-                this.temp=this.image1;
-                this.image1 = this.image2;
-                this.image2=this.temp;
-                
+            },
+            myFunction(img,likes) {	
+                this.iddot1=img
+                this.liked=img
+                console.log(likes)
+                likes=parseInt(likes);
+                likes=likes+1;
+                likes=likes.toString();
+                console.log(likes)
+                let email = sessionStorage.getItem('email');
+                let users = JSON.parse(localStorage.getItem("instausers"));
+                let newusers=[];
+                let newposts=[];
+                users.forEach(user => {
+                    if ((user.moboremail == email) || (user.uname==email) || (user.email==email)) {
+                        user.posts.forEach(post => {
+                            if(img==post.id){
+                                var npost={
+                                    id:post.id,
+                                    path:post.path,
+                                    comment:post.comment,
+                                    likes:likes,
+                                    date:post.date
+                                }
+                                newposts.push(npost)
+                            }
+                            else{
+                                newposts.push(post)
+                            }
+                        })
+                        let cuser = {
+                            moboremail: user.moboremail,
+                            fname: user.fname,
+                            uname: user.uname,
+                            pass: user.pass,
+                            phone: user.phone,
+                            email: user.email,
+                            website: user.website,
+                            bio: user.bio,
+                            gender: user.gender,
+                            profile: user.profile,
+                            posts: newposts,
+                            fav:user.fav
+                        }
+                        newusers.push(cuser);
+                    }
+                    else{
+                        newusers.push(user);
+                    }
+                })
+                localStorage.setItem("instausers", JSON.stringify(newusers));
             }
         }
     }
@@ -297,6 +344,7 @@
         height: 600px;
         object-fit: cover;
         margin-left: -1px;
+        border-bottom: 1px solid rgba(var(--ca6, 219, 219, 219), 1);
     }
     .post-p{
         background-color: white;
@@ -324,8 +372,10 @@
         outline: none;
     }
     .username-post {
-        text-align: left;
-        margin-left: 19em;
+        text-align: left;    
+        line-height: 3em;
+        border-bottom: 1px solid rgba(var(--ca6, 219, 219, 219), 1);
+        /* margin-left: 2%; */
     }
     .like-btn{
         text-align: left;
@@ -359,7 +409,7 @@
       box-shadow: none;
   }
   .three-dots {
-    margin-left: 51%;
+    margin-left: 83%;
 }
 .showmore {
     color: inherit;

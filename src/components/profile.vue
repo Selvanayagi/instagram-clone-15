@@ -260,8 +260,7 @@
                                         <transition-group name="slide" mode="out-in" enter-class="slide-in" leave-class="slide-out" enter-active-class="animated slide-in-active" leave-active-class="animated slide-out-active">
                                         <!-- eslint-disable vue/no-use-v-if-with-v-for,vue/no-confusing-v-for-v-if -->
                                         <div :key="index"
-                                            v-for="index in catl.slides"
-                                        >
+                                            v-for="index in catl.slides">
                                         <div v-if="index == active">
                                             <img :src="`${catl.path[index-1]}`" alt="" class="post-img">
                                         </div>
@@ -312,6 +311,7 @@
 
 <script>
     // import { Carousel, Slide} from 'vue-carousel';
+    import Vue from 'vue';
     export default {
         name: 'Home',
         props: {
@@ -323,7 +323,8 @@
         // },
         data() {
             return {
-                active: 1,
+                idm:"",
+                active: 1,  
                 editcom:"",
                 iddot:"",
                 timestamp:"",
@@ -351,6 +352,9 @@
             setInterval(this.getNow, 1000);
         },
         mounted() {
+            // this.active=1
+            // global active=1;
+            Vue.prototype.$active=1
             document.createElement('tr');
             this.urls.push({
                 id:this.i,
@@ -475,8 +479,12 @@
         },
       
         methods: {
+            msgm(id){
+                this.idm=id
+            },
             jump(index) {
                 this.active = index
+                // Vue.prototype.$active=index
             },
             addRow: function() {
                 document.createElement('tr');
